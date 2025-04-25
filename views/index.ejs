@@ -83,7 +83,7 @@
                 <% if (currentPeriod) { %>
                     <h3>Current Period</h3>
                     <p class="period-name"><%= currentPeriod.period %></p>
-                    <p class="period-time"><%= currentPeriod.start %> - <%= currentPeriod.end %></p>
+                    <p class="period-time"><%= moment(currentPeriod.start, 'HH:mm').format('h:mm A') %> - <%= moment(currentPeriod.end, 'HH:mm').format('h:mm A') %></p>
                 <% } else { %>
                     <h3>School is not in session</h3>
                     <p>Next school day starts at 7:40 AM</p>
@@ -94,7 +94,7 @@
                 <% if (nextPeriod) { %>
                     <h3>Next Period</h3>
                     <p class="period-name"><%= nextPeriod.period %></p>
-                    <p class="period-time"><%= nextPeriod.start %> - <%= nextPeriod.end %></p>
+                    <p class="period-time"><%= moment(nextPeriod.start, 'HH:mm').format('h:mm A') %> - <%= moment(nextPeriod.end, 'HH:mm').format('h:mm A') %></p>
                 <% } %>
             </div>
 
@@ -102,7 +102,7 @@
                 <% schedule.forEach(period => { %>
                     <div class="period <%= currentPeriod && currentPeriod.period === period.period ? 'active' : '' %>">
                         <div class="period-name"><%= period.period %></div>
-                        <div class="period-time"><%= period.start %> - <%= period.end %></div>
+                        <div class="period-time"><%= moment(period.start, 'HH:mm').format('h:mm A') %> - <%= moment(period.end, 'HH:mm').format('h:mm A') %></div>
                     </div>
                 <% }); %>
             </div>
@@ -160,7 +160,7 @@
                 currentPeriodDiv.innerHTML = `
                     <h3>Current Period</h3>
                     <p class="period-name">${data.currentPeriod.period}</p>
-                    <p class="period-time">${data.currentPeriod.start} - ${data.currentPeriod.end}</p>
+                    <p class="period-time">${moment(data.currentPeriod.start, 'HH:mm').format('h:mm A')} - ${moment(data.currentPeriod.end, 'HH:mm').format('h:mm A')}</p>
                 `;
             } else {
                 currentPeriodDiv.innerHTML = `
@@ -176,7 +176,7 @@
                 nextPeriodDiv.innerHTML = `
                     <h3>Next Period</h3>
                     <p class="period-name">${data.nextPeriod.period}</p>
-                    <p class="period-time">${data.nextPeriod.start} - ${data.nextPeriod.end}</p>
+                    <p class="period-time">${moment(data.nextPeriod.start, 'HH:mm').format('h:mm A')} - ${moment(data.nextPeriod.end, 'HH:mm').format('h:mm A')}</p>
                 `;
             } else {
                 nextPeriodDiv.innerHTML = '';

@@ -3,7 +3,8 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const moment = require('moment');
+const moment = require('moment-timezone');
+moment.tz.setDefault("America/New_York"); // Set timezone to EST
 const fetch = require('node-fetch');
 const basicAuth = require('./middleware/auth');
 
@@ -78,6 +79,11 @@ const marqueeMessages = [
     'Excellence in Education!'
 ];
 
+// Helper function to convert 24h time to 12h time for comparison
+function convertTo24Hour(time12h) {
+    return moment(time12h, 'h:mm A').format('HH:mm');
+}
+
 // Helper function to determine if it's during school hours
 function isDuringSchoolHours() {
     const now = moment();
@@ -88,7 +94,11 @@ function isDuringSchoolHours() {
     const firstPeriod = schedule[currentSchedule][0];
     const lastPeriod = schedule[currentSchedule][schedule[currentSchedule].length - 1];
     
-    return currentTime >= firstPeriod.start && currentTime <= lastPeriod.end;
+    // Convert schedule times to 24-hour format for comparison
+    const dayStart = firstPeriod.start;
+    const dayEnd = lastPeriod.end;
+    
+    return currentTime >= dayStart && currentTime <= dayEnd;
 }
 
 // Helper function to get current period
@@ -181,7 +191,7 @@ io.on('connection', (socket) => {
     
     // Send initial data
     socket.emit('timeUpdate', {
-        time: moment().format('HH:mm:ss'),
+        time: moment().format('h:mm:ss A'), // Changed to 12-hour format with AM/PM
         date: moment().format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
@@ -201,7 +211,7 @@ setInterval(() => {
     
     // Send updates to all connected clients
     io.emit('timeUpdate', {
-        time: moment().format('HH:mm:ss'),
+        time: moment().format('h:mm:ss A'), // Changed to 12-hour format with AM/PM
         date: moment().format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
