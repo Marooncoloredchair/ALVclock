@@ -146,7 +146,10 @@ app.get('/', (req, res) => {
         schedule: schedule[getCurrentScheduleType()],
         scheduleType: getCurrentScheduleType(),
         announcements: activeAnnouncements,
-        marqueeMessages: marqueeMessages
+        marqueeMessages: marqueeMessages,
+        currentPeriod: getCurrentPeriod(),
+        nextPeriod: getNextPeriod(),
+        specialEvent: null
     });
 });
 

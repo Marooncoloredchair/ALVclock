@@ -52,7 +52,7 @@
             <!-- Countdown will be inserted here -->
         </div>
 
-        <% if (specialEvent) { %>
+        <% if (typeof specialEvent !== 'undefined' && specialEvent !== null) { %>
             <div class="special-event">
                 <p><%= specialEvent.message %></p>
             </div>
