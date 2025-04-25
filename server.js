@@ -102,11 +102,14 @@ function convertTo24Hour(time12h) {
 
 // Helper function to determine if it's during school hours
 function isDuringSchoolHours() {
-    const now = moment();
+    const now = moment().tz("America/New_York");
+    console.log('Raw moment time:', now.format());
+    console.log('Timezone:', now.tz());
+    
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
-    console.log('Current time:', currentTime);
+    console.log('Current time (ET):', currentTime);
     console.log('Schedule type:', currentSchedule);
     
     if (!currentSchedule) return false;
@@ -142,11 +145,11 @@ function isDuringSchoolHours() {
 
 // Helper function to get current period
 function getCurrentPeriod() {
-    const now = moment();
+    const now = moment().tz("America/New_York");
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
-    console.log('Getting current period for time:', currentTime);
+    console.log('Getting current period for time (ET):', currentTime);
     
     if (!currentSchedule) return null;
 
@@ -175,7 +178,7 @@ function getCurrentPeriod() {
 
 // Helper function to get next period
 function getNextPeriod() {
-    const now = moment();
+    const now = moment().tz("America/New_York");
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
@@ -199,9 +202,9 @@ function getNextPeriod() {
 
 // Helper function to get current schedule type
 function getCurrentScheduleType() {
-    // Check for schedule overrides first
-    const today = moment().format('YYYY-MM-DD');
-    console.log('Checking schedule type for date:', today);
+    const now = moment().tz("America/New_York");
+    const today = now.format('YYYY-MM-DD');
+    console.log('Getting schedule type for date:', today);
     
     const override = scheduleOverrides.find(o => o.date === today);
     if (override) {
@@ -210,7 +213,7 @@ function getCurrentScheduleType() {
     }
 
     // Check if it's Wednesday
-    const dayOfWeek = moment().day();
+    const dayOfWeek = now.day();
     console.log('Day of week:', dayOfWeek);
     
     if (dayOfWeek === 3) { // Wednesday is 3
@@ -283,26 +286,45 @@ app.post('/admin/schedule-override', (req, res) => {
 });
 
 // Socket.IO connection handling
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
     console.log('A user connected');
     
-    // Get initial weather data
-    const weatherData = await getWeatherData();
+    // Initial data send
+    const now = moment().tz("America/New_York");
+    console.log('Socket connection - sending initial time:', now.format());
     
-    // Send initial data
     socket.emit('timeUpdate', {
-        time: moment().format('h:mm:ss A'),
-        date: moment().format('dddd, MMMM D, YYYY'),
+        time: now.format('h:mm:ss A'),
+        date: now.format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
-        isDuringSchool: isDuringSchoolHours(),
-        scheduleType: getCurrentScheduleType(),
-        weather: weatherData,
-        marqueeMessages: marqueeMessages
+        duringSchoolHours: isDuringSchoolHours(),
+        scheduleType: getCurrentScheduleType()
     });
+
+    // Set up interval for updates
+    const interval = setInterval(() => {
+        const now = moment().tz("America/New_York");
+        if (process.env.DEBUG) {
+            console.log('Socket update - current time:', now.format());
+            console.log('- During school hours:', isDuringSchoolHours());
+            console.log('- Current period:', getCurrentPeriod());
+            console.log('- Next period:', getNextPeriod());
+        }
+        
+        socket.emit('timeUpdate', {
+            time: now.format('h:mm:ss A'),
+            date: now.format('dddd, MMMM D, YYYY'),
+            currentPeriod: getCurrentPeriod(),
+            nextPeriod: getNextPeriod(),
+            duringSchoolHours: isDuringSchoolHours(),
+            scheduleType: getCurrentScheduleType()
+        });
+    }, 1000);
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
+        clearInterval(interval);
     });
 });
 
@@ -318,15 +340,15 @@ setInterval(async () => {
         weatherData = await getWeatherData();
     }
 
+    const now = moment().tz("America/New_York");
     // Check if we need to ring the bell
-    const now = moment();
     const currentTime = now.format('HH:mm');
     const shouldRingBell = bellTimes.has(currentTime);
     
     // Send updates to all connected clients
     io.emit('timeUpdate', {
-        time: moment().format('h:mm:ss A'),
-        date: moment().format('dddd, MMMM D, YYYY'),
+        time: now.format('h:mm:ss A'),
+        date: now.format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
         isDuringSchool: isDuringSchoolHours(),
@@ -342,4 +364,18 @@ setInterval(async () => {
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log('Current server time:', moment().format());
+    console.log('Current NY time:', moment().tz("America/New_York").format());
+    console.log('Server timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone);
+    console.log('Node TZ env:', process.env.TZ);
+    
+    // Log initial schedule state
+    const now = moment().tz("America/New_York");
+    console.log('Initial schedule state:');
+    console.log('- Time:', now.format('h:mm:ss A'));
+    console.log('- Date:', now.format('dddd, MMMM D, YYYY'));
+    console.log('- During school hours:', isDuringSchoolHours());
+    console.log('- Current period:', getCurrentPeriod());
+    console.log('- Next period:', getNextPeriod());
+    console.log('- Schedule type:', getCurrentScheduleType());
 });
