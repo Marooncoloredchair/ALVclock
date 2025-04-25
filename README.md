@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dr. Jorge Alvarez High School Digital Clock
 
 A real-time digital clock and schedule display system designed specifically for Dr. Jorge Alvarez High School. This application provides a modern, web-based solution for displaying current time, period information, weather updates, and school announcements.
@@ -90,3 +91,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 For support or questions, please open an issue in the GitHub repository. 
+=======
+# ALVclock
+>>>>>>> 2d5161516dc5311bedf8c1f7784e4b5446b97392
