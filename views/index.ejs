@@ -112,7 +112,10 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
     <script>
+        moment.tz.setDefault("America/New_York");
         const socket = io();
         const bellSound = document.getElementById('bellSound');
         
@@ -182,12 +185,13 @@
                 nextPeriodDiv.innerHTML = '';
             }
 
-            // Update active period in schedule grid
+            // Update schedule grid
             document.querySelectorAll('.period').forEach(periodDiv => {
-                periodDiv.classList.remove('active');
-                if (data.currentPeriod && 
-                    periodDiv.querySelector('.period-name').textContent === data.currentPeriod.period) {
+                const periodName = periodDiv.querySelector('.period-name').textContent;
+                if (data.currentPeriod && data.currentPeriod.period === periodName) {
                     periodDiv.classList.add('active');
+                } else {
+                    periodDiv.classList.remove('active');
                 }
             });
 

@@ -155,7 +155,8 @@ app.get('/', (req, res) => {
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
         specialEvent: null,
-        isSchoolHours: isDuringSchoolHours()
+        isSchoolHours: isDuringSchoolHours(),
+        moment: moment
     });
 });
 
