@@ -81,30 +81,26 @@ const marqueeMessages = [
 // Helper function to determine if it's during school hours
 function isDuringSchoolHours() {
     const now = moment();
+    const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     if (!currentSchedule) return false;
 
     const firstPeriod = schedule[currentSchedule][0];
     const lastPeriod = schedule[currentSchedule][schedule[currentSchedule].length - 1];
     
-    const schoolStart = moment(firstPeriod.start, 'HH:mm');
-    const schoolEnd = moment(lastPeriod.end, 'HH:mm');
-    
-    return now.isBetween(schoolStart, schoolEnd);
+    return currentTime >= firstPeriod.start && currentTime <= lastPeriod.end;
 }
 
 // Helper function to get current period
 function getCurrentPeriod() {
     const now = moment();
+    const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
     if (!currentSchedule) return null;
     
     for (const period of schedule[currentSchedule]) {
-        const start = moment(period.start, 'HH:mm');
-        const end = moment(period.end, 'HH:mm');
-        
-        if (now.isBetween(start, end)) {
+        if (currentTime >= period.start && currentTime <= period.end) {
             return period;
         }
     }
@@ -114,15 +110,14 @@ function getCurrentPeriod() {
 // Helper function to get next period
 function getNextPeriod() {
     const now = moment();
+    const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
     if (!currentSchedule) return null;
     
     for (let i = 0; i < schedule[currentSchedule].length; i++) {
         const period = schedule[currentSchedule][i];
-        const start = moment(period.start, 'HH:mm');
-        
-        if (now.isBefore(start)) {
+        if (currentTime < period.start) {
             return period;
         }
     }
@@ -149,7 +144,8 @@ app.get('/', (req, res) => {
         marqueeMessages: marqueeMessages,
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
-        specialEvent: null
+        specialEvent: null,
+        isSchoolHours: isDuringSchoolHours()
     });
 });
 
