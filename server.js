@@ -383,33 +383,16 @@ io.on('connection', (socket) => {
         date: now.format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
-        duringSchoolHours: isDuringSchoolHours(),
-        scheduleType: getCurrentScheduleType()
+        isDuringSchool: isDuringSchoolHours(),
+        scheduleType: getCurrentScheduleType(),
+        announcements: activeAnnouncements,
+        weather: null,
+        marqueeMessages: marqueeMessages,
+        ringBell: false
     });
-
-    // Set up interval for updates
-    const interval = setInterval(() => {
-        const now = moment().tz("America/New_York");
-        if (process.env.DEBUG) {
-            console.log('Socket update - current time:', now.format());
-            console.log('- During school hours:', isDuringSchoolHours());
-            console.log('- Current period:', getCurrentPeriod());
-            console.log('- Next period:', getNextPeriod());
-        }
-        
-        socket.emit('timeUpdate', {
-            time: now.format('h:mm:ss A'),
-            date: now.format('dddd, MMMM D, YYYY'),
-            currentPeriod: getCurrentPeriod(),
-            nextPeriod: getNextPeriod(),
-            duringSchoolHours: isDuringSchoolHours(),
-            scheduleType: getCurrentScheduleType()
-        });
-    }, 1000);
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
-        clearInterval(interval);
     });
 });
 

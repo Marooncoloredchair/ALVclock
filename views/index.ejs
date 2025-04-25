@@ -302,6 +302,7 @@
                     <p class="period-name">${data.currentPeriod.period}</p>
                     <p class="period-time">${moment(data.currentPeriod.start, 'HH:mm').format('h:mm A')} - ${moment(data.currentPeriod.end, 'HH:mm').format('h:mm A')}</p>
                 `;
+                document.body.classList.remove('after-hours');
             } else {
                 currentPeriodDiv.innerHTML = `
                     <h3>School is not in session</h3>
@@ -331,13 +332,6 @@
                     periodDiv.classList.remove('active');
                 }
             });
-
-            // Toggle after-hours class
-            if (!data.isDuringSchool) {
-                document.body.classList.add('after-hours');
-            } else {
-                document.body.classList.remove('after-hours');
-            }
         });
 
         socket.on('announcementsUpdate', (announcements) => {
