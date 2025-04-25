@@ -1,8 +1,0 @@
----
-:orm: mongomapper
-:test: rspec
-:mock: none
-:script: jquery
-:renderer: haml
-:stylesheet: compass
-:namespace: Clock

@@ -3,68 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= schoolName %> Clock</title>
+    <title>Dr. Jorge Alvarez High School Clock</title>
     <link rel="stylesheet" href="/css/style.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        .announcements {
+            background-color: #ff4444;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><%= schoolName %></h1>
+            <img src="/images/alvarez-logo.png" alt="Alvarez Eagles Logo" class="school-logo">
+            <h1>Dr. Jorge Alvarez High School</h1>
         </header>
 
-        <div class="clock-container">
-            <div class="time" id="time">00:00:00</div>
-            <div class="date" id="date">Loading...</div>
+        <div id="announcements" class="announcements" style="display: none;">
+            <div class="announcement-content">
+                <span id="announcement-text"></span>
+            </div>
+        </div>
+
+        <div class="info-container">
+            <div class="clock-container">
+                <div id="time" class="time"></div>
+                <div id="date" class="date"></div>
+            </div>
+            
+            <div class="weather-container" id="weather">
+                <!-- Weather info will be inserted here -->
+            </div>
+        </div>
+
+        <div class="countdown-container" id="countdown">
+            <!-- Countdown will be inserted here -->
+        </div>
+
+        <% if (specialEvent) { %>
+            <div class="special-event">
+                <p><%= specialEvent.message %></p>
+            </div>
+        <% } %>
+
+        <div class="marquee-container">
+            <div class="marquee" id="marquee">
+                <% marqueeMessages.forEach(message => { %>
+                    <span><%= message %></span>
+                <% }); %>
+            </div>
         </div>
 
         <div class="schedule-container">
-            <div class="current-period">
-                <h2>Current Period</h2>
-                <div id="currentPeriod">
-                    <% if (currentPeriod) { %>
-                        <div class="period active">
-                            <span class="period-name"><%= currentPeriod.period %></span>
-                            <span class="period-time"><%= currentPeriod.start %> - <%= currentPeriod.end %></span>
-                        </div>
-                    <% } else { %>
-                        <div class="period">No active period</div>
+            <div class="schedule-type">
+                <h2>
+                    <% if (scheduleType === 'regular') { %>
+                        Regular Schedule
+                    <% } else if (scheduleType === 'extended') { %>
+                        Extended Advisory Schedule
+                    <% } else if (scheduleType === 'early') { %>
+                        Early Release Schedule
                     <% } %>
-                </div>
+                </h2>
             </div>
 
-            <div class="schedule">
-                <h2>Today's Schedule</h2>
-                <div class="periods">
-                    <% schedule.forEach(function(period) { %>
-                        <div class="period <%= currentPeriod && currentPeriod.period === period.period ? 'active' : '' %>">
-                            <span class="period-name"><%= period.period %></span>
-                            <span class="period-time"><%= period.start %> - <%= period.end %></span>
-                        </div>
-                    <% }); %>
-                </div>
+            <div class="current-period" id="current-period">
+                <% if (currentPeriod) { %>
+                    <h3>Current Period</h3>
+                    <p class="period-name"><%= currentPeriod.period %></p>
+                    <p class="period-time"><%= currentPeriod.start %> - <%= currentPeriod.end %></p>
+                <% } else { %>
+                    <h3>School is not in session</h3>
+                    <p>Next school day starts at 7:40 AM</p>
+                <% } %>
+            </div>
+
+            <div class="next-period" id="next-period">
+                <% if (nextPeriod) { %>
+                    <h3>Next Period</h3>
+                    <p class="period-name"><%= nextPeriod.period %></p>
+                    <p class="period-time"><%= nextPeriod.start %> - <%= nextPeriod.end %></p>
+                <% } %>
+            </div>
+
+            <div class="schedule-grid">
+                <% schedule.forEach(period => { %>
+                    <div class="period <%= currentPeriod && currentPeriod.period === period.period ? 'active' : '' %>">
+                        <div class="period-name"><%= period.period %></div>
+                        <div class="period-time"><%= period.start %> - <%= period.end %></div>
+                    </div>
+                <% }); %>
             </div>
         </div>
+
+        <audio id="bellSound" src="/sounds/bell.mp3"></audio>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        const bellSound = document.getElementById('bellSound');
         
-        socket.on('timeUpdate', function(data) {
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+        
+        socket.on('timeUpdate', (data) => {
             document.getElementById('time').textContent = data.time;
             document.getElementById('date').textContent = data.date;
-            
-            // Update current period
-            const currentPeriodDiv = document.getElementById('currentPeriod');
-            if (data.currentPeriod) {
-                currentPeriodDiv.innerHTML = `
-                    <div class="period active">
-                        <span class="period-name">${data.currentPeriod.period}</span>
-                        <span class="period-time">${data.currentPeriod.start} - ${data.currentPeriod.end}</span>
-                    </div>
+
+            // Update weather
+            if (data.weather) {
+                document.getElementById('weather').innerHTML = `
+                    <img src="https://openweathermap.org/img/w/${data.weather.icon}.png" alt="${data.weather.description}">
+                    <span class="temp">${data.weather.temp}°F</span>
+                    <span class="description">${data.weather.description}</span>
+                `;
+            }
+
+            // Update countdown
+            if (data.countdown && data.nextPeriod) {
+                document.getElementById('countdown').innerHTML = `
+                    <p>Next period (${data.nextPeriod.period}) starts in: ${data.countdown}</p>
                 `;
             } else {
-                currentPeriodDiv.innerHTML = '<div class="period">No active period</div>';
+                document.getElementById('countdown').innerHTML = '';
+            }
+
+            // Play bell sound if needed
+            if (data.ringBell) {
+                bellSound.play().catch(err => console.log('Bell sound error:', err));
+            }
+
+            // Update marquee messages
+            const marqueeDiv = document.getElementById('marquee');
+            marqueeDiv.innerHTML = data.marqueeMessages.map(message => 
+                `<span>${message}</span>`
+            ).join('');
+
+            // Update current period display
+            const currentPeriodDiv = document.getElementById('current-period');
+            if (data.isSchoolHours && data.currentPeriod) {
+                currentPeriodDiv.innerHTML = `
+                    <h3>Current Period</h3>
+                    <p class="period-name">${data.currentPeriod.period}</p>
+                    <p class="period-time">${data.currentPeriod.start} - ${data.currentPeriod.end}</p>
+                `;
+            } else {
+                currentPeriodDiv.innerHTML = `
+                    <h3>School is not in session</h3>
+                    <p>Next school day starts at 7:40 AM</p>
+                `;
+                document.body.classList.add('after-hours');
+            }
+
+            // Update next period display
+            const nextPeriodDiv = document.getElementById('next-period');
+            if (data.nextPeriod) {
+                nextPeriodDiv.innerHTML = `
+                    <h3>Next Period</h3>
+                    <p class="period-name">${data.nextPeriod.period}</p>
+                    <p class="period-time">${data.nextPeriod.start} - ${data.nextPeriod.end}</p>
+                `;
+            } else {
+                nextPeriodDiv.innerHTML = '';
+            }
+
+            // Update active period in schedule grid
+            document.querySelectorAll('.period').forEach(periodDiv => {
+                periodDiv.classList.remove('active');
+                if (data.currentPeriod && 
+                    periodDiv.querySelector('.period-name').textContent === data.currentPeriod.period) {
+                    periodDiv.classList.add('active');
+                }
+            });
+
+            // Toggle after-hours class
+            if (!data.isSchoolHours) {
+                document.body.classList.add('after-hours');
+            } else {
+                document.body.classList.remove('after-hours');
+            }
+        });
+
+        socket.on('announcementsUpdate', (announcements) => {
+            const announcementsDiv = document.getElementById('announcements');
+            const announcementText = document.getElementById('announcement-text');
+            
+            if (announcements && announcements.length > 0) {
+                // Display the most recent announcement
+                announcementText.textContent = announcements[0].message;
+                announcementsDiv.style.display = 'block';
+                
+                // If there are multiple announcements, rotate them
+                let currentIndex = 0;
+                setInterval(() => {
+                    currentIndex = (currentIndex + 1) % announcements.length;
+                    announcementText.textContent = announcements[currentIndex].message;
+                }, 5000);
+            } else {
+                announcementsDiv.style.display = 'none';
             }
         });
     </script>

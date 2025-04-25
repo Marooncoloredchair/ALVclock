@@ -1,8 +1,11 @@
 :root {
-    --primary-color: #800000;    /* Maroon */
-    --secondary-color: #808080;  /* Grey */
-    --text-color: #FFFFFF;       /* White */
-    --accent-color: #606060;     /* Darker Grey */
+    --primary-color: #800000; /* Maroon */
+    --secondary-color: #808080; /* Grey */
+    --text-color: #333;
+    --background-color: #f5f5f5;
+    --period-bg: #fff;
+    --period-active-bg: #800000; /* Maroon */
+    --period-active-text: #fff;
 }
 
 * {
@@ -13,119 +16,326 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: var(--primary-color);
+    background-color: var(--background-color);
     color: var(--text-color);
-    min-height: 100vh;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+}
+
+body.after-hours {
+    background-color: #1a1a1a;
+    color: #fff;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 2rem;
 }
 
 header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: var(--secondary-color);
-    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
-header h1 {
-    font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+.school-logo {
+    width: 100px;
+    height: auto;
+}
+
+h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+}
+
+.after-hours h1 {
+    color: var(--secondary-color);
 }
 
 .clock-container {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 2rem;
 }
 
 .time {
-    font-size: 6em;
+    font-size: 4rem;
     font-weight: bold;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.after-hours .time {
+    color: var(--secondary-color);
 }
 
 .date {
-    font-size: 2em;
-    margin-top: 10px;
+    font-size: 1.5rem;
     color: var(--text-color);
+}
+
+.after-hours .date {
+    color: #ccc;
 }
 
 .schedule-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 20px;
-    background-color: rgba(128, 128, 128, 0.2);
-    padding: 20px;
+    background-color: var(--period-bg);
     border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.current-period, .schedule {
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 20px;
+.after-hours .schedule-container {
+    background-color: #2a2a2a;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.schedule-type {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.schedule-type h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.after-hours .schedule-type h2 {
+    color: var(--secondary-color);
+}
+
+.current-period, .next-period {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: rgba(128, 0, 0, 0.1); /* Maroon with opacity */
     border-radius: 8px;
 }
 
-h2 {
-    margin-bottom: 20px;
-    color: var(--text-color);
-    font-size: 1.8em;
+.after-hours .current-period,
+.after-hours .next-period {
+    background-color: rgba(128, 128, 128, 0.1); /* Grey with opacity */
 }
 
-.period {
-    background-color: var(--secondary-color);
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.period.active {
-    background-color: var(--text-color);
+.current-period h3,
+.next-period h3 {
     color: var(--primary-color);
-    border: 2px solid var(--accent-color);
-    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.after-hours .current-period h3,
+.after-hours .next-period h3 {
+    color: var(--secondary-color);
 }
 
 .period-name {
-    font-size: 1.2em;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
 }
 
 .period-time {
-    font-size: 1.1em;
+    font-size: 1.2rem;
+    color: #666;
 }
 
-/* Responsive Design */
+.after-hours .period-time {
+    color: #999;
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.period {
+    padding: 1rem;
+    background-color: var(--period-bg);
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.period:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.after-hours .period {
+    background-color: #2a2a2a;
+    border-color: #333;
+}
+
+.period.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--secondary-color);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(128, 0, 0, 0.2);
+}
+
+.after-hours .period.active {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
 @media (max-width: 768px) {
-    .schedule-container {
-        grid-template-columns: 1fr;
+    .container {
+        padding: 1rem;
+    }
+
+    header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
     }
 
     .time {
-        font-size: 4em;
+        font-size: 3rem;
     }
 
-    .date {
-        font-size: 1.5em;
-    }
-
-    header h1 {
-        font-size: 2em;
+    .schedule-grid {
+        grid-template-columns: 1fr;
     }
 }
 
-/* Animations */
-@keyframes periodHighlight {
+.marquee-container {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 0;
+    margin: 1rem 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.marquee {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marquee 20s linear infinite;
+}
+
+.marquee span {
+    margin: 0 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.after-hours .marquee-container {
+    background-color: var(--secondary-color);
+}
+
+.info-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.weather-container {
+    background: rgba(128, 0, 0, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.weather-container img {
+    width: 50px;
+    height: 50px;
+}
+
+.weather-container .temp {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.weather-container .description {
+    text-transform: capitalize;
+    color: var(--text-color);
+}
+
+.countdown-container {
+    background: rgba(128, 0, 0, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.special-event {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.02); }
     100% { transform: scale(1); }
 }
 
-.period.active {
-    animation: periodHighlight 2s infinite;
+.after-hours .weather-container {
+    background: rgba(128, 128, 128, 0.1);
+}
+
+.after-hours .weather-container .temp {
+    color: var(--secondary-color);
+}
+
+.after-hours .countdown-container {
+    background: rgba(128, 128, 128, 0.05);
+    color: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+    .info-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .weather-container {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .weather-container .temp {
+        font-size: 1.5rem;
+    }
 } 

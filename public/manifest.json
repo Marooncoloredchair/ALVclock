@@ -1,0 +1,16 @@
+{
+    "name": "Dr. Jorge Alvarez High School Clock",
+    "short_name": "Alvarez Clock",
+    "description": "Digital clock and schedule display for Dr. Jorge Alvarez High School",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f5f5f5",
+    "theme_color": "#800000",
+    "icons": [
+        {
+            "src": "/images/alvarez-logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+} 

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALV Clock Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .admin-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .emergency {
+            background-color: #ff4444;
+        }
+        .emergency:hover {
+            background-color: #cc0000;
+        }
+        .current-schedule {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>ALV Clock Admin Panel</h1>
+        
+        <!-- Emergency Announcements -->
+        <div class="admin-section">
+            <h2>Emergency Announcements</h2>
+            <form id="emergencyForm" action="/admin/announcement" method="POST">
+                <div class="form-group">
+                    <label for="message">Announcement Message:</label>
+                    <input type="text" id="message" name="message" required>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration (minutes):</label>
+                    <input type="number" id="duration" name="duration" min="1" max="1440" value="60">
+                </div>
+                <button type="submit" class="emergency">Post Emergency Announcement</button>
+            </form>
+        </div>
+
+        <!-- Schedule Override -->
+        <div class="admin-section">
+            <h2>Schedule Override</h2>
+            <form id="overrideForm" action="/admin/override" method="POST">
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleType">Schedule Type:</label>
+                    <select id="scheduleType" name="scheduleType" required>
+                        <option value="regular">Regular</option>
+                        <option value="extended">Extended</option>
+                        <option value="early">Early Release</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Override Reason:</label>
+                    <input type="text" id="reason" name="reason" required>
+                </div>
+                <button type="submit">Set Schedule Override</button>
+            </form>
+        </div>
+
+        <!-- Current Settings Display -->
+        <div class="admin-section">
+            <h2>Current Settings</h2>
+            <div class="current-schedule">
+                <h3>Active Announcements</h3>
+                <ul id="activeAnnouncements">
+                    <% if (activeAnnouncements && activeAnnouncements.length > 0) { %>
+                        <% activeAnnouncements.forEach(announcement => { %>
+                            <li>
+                                <%= announcement.message %> 
+                                (Expires: <%= announcement.expiresAt %>)
+                                <button onclick="deleteAnnouncement('<%= announcement.id %>')">Delete</button>
+                            </li>
+                        <% }); %>
+                    <% } else { %>
+                        <li>No active announcements</li>
+                    <% } %>
+                </ul>
+
+                <h3>Upcoming Schedule Overrides</h3>
+                <ul id="scheduleOverrides">
+                    <% if (scheduleOverrides && scheduleOverrides.length > 0) { %>
+                        <% scheduleOverrides.forEach(override => { %>
+                            <li>
+                                <%= override.date %>: <%= override.scheduleType %> 
+                                (<%= override.reason %>)
+                                <button onclick="deleteOverride('<%= override.date %>')">Delete</button>
+                            </li>
+                        <% }); %>
+                    <% } else { %>
+                        <li>No upcoming schedule overrides</li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin panel JavaScript
+        async function deleteAnnouncement(id) {
+            if (confirm('Are you sure you want to delete this announcement?')) {
+                try {
+                    const response = await fetch(`/admin/announcement/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        }
+
+        async function deleteOverride(date) {
+            if (confirm('Are you sure you want to delete this schedule override?')) {
+                try {
+                    const response = await fetch(`/admin/override/${date}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html> 
