@@ -103,76 +103,109 @@ function convertTo24Hour(time12h) {
 // Helper function to determine if it's during school hours
 function isDuringSchoolHours() {
     const now = moment().tz("America/New_York");
-    console.log('Raw moment time:', now.format());
-    console.log('Timezone:', now.tz());
-    
     const currentTime = now.format('HH:mm');
+    const dayOfWeek = now.format('dddd');
     const currentSchedule = getCurrentScheduleType();
-    
-    console.log('Current time (ET):', currentTime);
-    console.log('Schedule type:', currentSchedule);
-    
-    if (!currentSchedule) return false;
+
+    console.log('Checking school hours:', {
+        rawTime: now.format(),
+        timezone: now.tz(),
+        currentTime,
+        dayOfWeek,
+        currentSchedule
+    });
+
+    // Check if it's a weekend
+    if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
+        console.log('Weekend detected - not during school hours');
+        return false;
+    }
+
+    if (!currentSchedule) {
+        console.log('No schedule type found for today - not during school hours');
+        return false;
+    }
 
     const scheduleForToday = schedule[currentSchedule];
-    const firstPeriod = scheduleForToday[0];
-    const lastPeriod = scheduleForToday[scheduleForToday.length - 1];
-
-    // Check if it's a weekday (Monday = 1, Sunday = 0)
-    const dayOfWeek = now.day();
-    console.log('Day of week:', dayOfWeek);
-    if (dayOfWeek === 0 || dayOfWeek === 6) return false;
-
-    // Convert times to minutes since midnight
     const [currentHour, currentMinute] = currentTime.split(':').map(Number);
     const currentMinutes = currentHour * 60 + currentMinute;
 
+    // Get first period start time
+    const firstPeriod = scheduleForToday[0];
     const [startHour, startMinute] = firstPeriod.start.split(':').map(Number);
-    const startMinutes = startHour * 60 + startMinute;
+    const schoolStartMinutes = startHour * 60 + startMinute;
 
+    // Get last period end time
+    const lastPeriod = scheduleForToday[scheduleForToday.length - 1];
     const [endHour, endMinute] = lastPeriod.end.split(':').map(Number);
-    const endMinutes = endHour * 60 + endMinute;
+    const schoolEndMinutes = endHour * 60 + endMinute;
 
-    console.log('Current minutes since midnight:', currentMinutes);
-    console.log('School start minutes since midnight:', startMinutes);
-    console.log('School end minutes since midnight:', endMinutes);
+    console.log('Time calculations:', {
+        currentMinutes,
+        schoolStartMinutes: schoolStartMinutes - 20, // 20 minute buffer before
+        schoolEndMinutes: schoolEndMinutes + 10, // 10 minute buffer after
+        rawSchoolStartMinutes: schoolStartMinutes,
+        rawSchoolEndMinutes: schoolEndMinutes
+    });
 
-    // Add a small buffer before and after school hours (10 minutes)
-    const isInSession = currentMinutes >= (startMinutes - 10) && currentMinutes <= (endMinutes + 10);
-    console.log('Is in session:', isInSession);
-    return isInSession;
+    // Check if current time is within school hours (including buffers)
+    const isDuringHours = currentMinutes >= (schoolStartMinutes - 20) && 
+                         currentMinutes <= (schoolEndMinutes + 10);
+
+    console.log('Is during school hours:', isDuringHours);
+    return isDuringHours;
 }
 
 // Helper function to get current period
 function getCurrentPeriod() {
+    if (!isDuringSchoolHours()) {
+        console.log('Not during school hours - no current period');
+        return null;
+    }
+
     const now = moment().tz("America/New_York");
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
-    console.log('Getting current period for time (ET):', currentTime);
-    
-    if (!currentSchedule) return null;
+    console.log('Getting current period:', {
+        currentTime,
+        currentSchedule,
+        rawTime: now.format(),
+        timezone: now.tz()
+    });
 
-    // Convert current time to minutes since midnight
+    if (!currentSchedule) {
+        console.log('No schedule type found for today');
+        return null;
+    }
+
+    const scheduleForToday = schedule[currentSchedule];
     const [currentHour, currentMinute] = currentTime.split(':').map(Number);
     const currentMinutes = currentHour * 60 + currentMinute;
-    
-    for (const period of schedule[currentSchedule]) {
-        // Convert period times to minutes since midnight
-        const [startHour, startMinute] = period.start.split(':').map(Number);
-        const startMinutes = startHour * 60 + startMinute;
 
+    for (const period of scheduleForToday) {
+        const [startHour, startMinute] = period.start.split(':').map(Number);
         const [endHour, endMinute] = period.end.split(':').map(Number);
+        const startMinutes = startHour * 60 + startMinute;
         const endMinutes = endHour * 60 + endMinute;
-        
-        console.log(`Checking period ${period.period} - Start: ${startMinutes}, End: ${endMinutes}, Current: ${currentMinutes}`);
-        
+
+        console.log('Checking period:', {
+            periodName: period.name,
+            startTime: period.start,
+            endTime: period.end,
+            currentMinutes,
+            startMinutes,
+            endMinutes,
+            isWithinPeriod: currentMinutes >= startMinutes && currentMinutes <= endMinutes
+        });
+
         if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
-            console.log('Found current period:', period.period);
+            console.log('Found current period:', period.name);
             return period;
         }
     }
-    console.log('No current period found');
+
+    console.log('No current period found in schedule');
     return null;
 }
 
@@ -182,22 +215,52 @@ function getNextPeriod() {
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
-    if (!currentSchedule) return null;
+    console.log('Getting next period:', {
+        currentTime,
+        currentSchedule,
+        rawTime: now.format(),
+        timezone: now.tz()
+    });
 
-    // Convert current time to minutes since midnight
+    if (!currentSchedule) {
+        console.log('No schedule type found for today');
+        return null;
+    }
+
+    const scheduleForToday = schedule[currentSchedule];
     const [currentHour, currentMinute] = currentTime.split(':').map(Number);
     const currentMinutes = currentHour * 60 + currentMinute;
-    
-    for (const period of schedule[currentSchedule]) {
-        // Convert period start time to minutes since midnight
+
+    let nextPeriod = null;
+    let smallestDifference = Infinity;
+
+    for (const period of scheduleForToday) {
         const [startHour, startMinute] = period.start.split(':').map(Number);
         const startMinutes = startHour * 60 + startMinute;
-        
-        if (currentMinutes < startMinutes) {
-            return period;
+        const timeDifference = startMinutes - currentMinutes;
+
+        console.log('Checking next period:', {
+            periodName: period.name,
+            startTime: period.start,
+            currentMinutes,
+            startMinutes,
+            timeDifference,
+            isNextPeriod: timeDifference > 0 && timeDifference < smallestDifference
+        });
+
+        if (timeDifference > 0 && timeDifference < smallestDifference) {
+            smallestDifference = timeDifference;
+            nextPeriod = period;
         }
     }
-    return null;
+
+    if (nextPeriod) {
+        console.log('Found next period:', nextPeriod.name);
+    } else {
+        console.log('No next period found in schedule');
+    }
+
+    return nextPeriod;
 }
 
 // Helper function to get current schedule type
