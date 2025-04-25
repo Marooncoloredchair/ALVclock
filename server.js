@@ -107,26 +107,34 @@ function isDuringSchoolHours() {
     const dayOfWeek = now.format('dddd');
     const currentSchedule = getCurrentScheduleType();
 
-    console.log('Checking school hours:', {
-        rawTime: now.format(),
-        timezone: now.tz(),
+    // Add more detailed logging
+    console.log('DEBUG - isDuringSchoolHours check:', {
         currentTime,
         dayOfWeek,
-        currentSchedule
+        currentSchedule,
+        rawMoment: now.format(),
+        unixTimestamp: now.valueOf(),
+        timezone: now.tz(),
+        utcOffset: now.utcOffset()
     });
 
     // Check if it's a weekend
     if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
-        console.log('Weekend detected - not during school hours');
+        console.log('DEBUG - Weekend detected:', dayOfWeek);
         return false;
     }
 
     if (!currentSchedule) {
-        console.log('No schedule type found for today - not during school hours');
+        console.log('DEBUG - No schedule type found for today');
         return false;
     }
 
     const scheduleForToday = schedule[currentSchedule];
+    if (!scheduleForToday) {
+        console.log('DEBUG - No schedule found for type:', currentSchedule);
+        return false;
+    }
+
     const [currentHour, currentMinute] = currentTime.split(':').map(Number);
     const currentMinutes = currentHour * 60 + currentMinute;
 
@@ -140,19 +148,27 @@ function isDuringSchoolHours() {
     const [endHour, endMinute] = lastPeriod.end.split(':').map(Number);
     const schoolEndMinutes = endHour * 60 + endMinute;
 
-    console.log('Time calculations:', {
+    console.log('DEBUG - Time calculations:', {
+        currentTime: `${currentHour}:${currentMinute}`,
         currentMinutes,
-        schoolStartMinutes: schoolStartMinutes - 20, // 20 minute buffer before
-        schoolEndMinutes: schoolEndMinutes + 10, // 10 minute buffer after
-        rawSchoolStartMinutes: schoolStartMinutes,
-        rawSchoolEndMinutes: schoolEndMinutes
+        schoolStartTime: `${startHour}:${startMinute}`,
+        schoolStartMinutes,
+        schoolEndTime: `${endHour}:${endMinute}`,
+        schoolEndMinutes,
+        bufferStart: schoolStartMinutes - 20,
+        bufferEnd: schoolEndMinutes + 10
     });
 
     // Check if current time is within school hours (including buffers)
     const isDuringHours = currentMinutes >= (schoolStartMinutes - 20) && 
                          currentMinutes <= (schoolEndMinutes + 10);
 
-    console.log('Is during school hours:', isDuringHours);
+    console.log('DEBUG - Final result:', {
+        isDuringHours,
+        beforeSchool: currentMinutes < (schoolStartMinutes - 20),
+        afterSchool: currentMinutes > (schoolEndMinutes + 10)
+    });
+
     return isDuringHours;
 }
 
