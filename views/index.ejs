@@ -280,19 +280,23 @@
             }
 
             // Play bell sound if needed
-            if (data.ringBell) {
-                bellSound.play().catch(err => console.log('Bell sound error:', err));
+            if (data.ringBell && bellSound) {
+                bellSound.play().catch(err => {
+                    console.log('Bell sound error:', err);
+                });
             }
 
             // Update marquee messages
             const marqueeDiv = document.getElementById('marquee');
-            marqueeDiv.innerHTML = data.marqueeMessages.map(message => 
-                `<span>${message}</span>`
-            ).join('');
+            if (data.marqueeMessages && Array.isArray(data.marqueeMessages)) {
+                marqueeDiv.innerHTML = data.marqueeMessages.map(message => 
+                    `<span>${message}</span>`
+                ).join('');
+            }
 
             // Update current period display
             const currentPeriodDiv = document.getElementById('current-period');
-            if (data.isSchoolHours && data.currentPeriod) {
+            if (data.isDuringSchool && data.currentPeriod) {
                 currentPeriodDiv.innerHTML = `
                     <h3>Current Period</h3>
                     <p class="period-name">${data.currentPeriod.period}</p>
@@ -329,7 +333,7 @@
             });
 
             // Toggle after-hours class
-            if (!data.isSchoolHours) {
+            if (!data.isDuringSchool) {
                 document.body.classList.add('after-hours');
             } else {
                 document.body.classList.remove('after-hours');

@@ -260,7 +260,8 @@ io.on('connection', async (socket) => {
         nextPeriod: getNextPeriod(),
         isDuringSchool: isDuringSchoolHours(),
         scheduleType: getCurrentScheduleType(),
-        weather: weatherData
+        weather: weatherData,
+        marqueeMessages: marqueeMessages
     });
 
     socket.on('disconnect', () => {
@@ -279,6 +280,11 @@ setInterval(async () => {
     if (currentMinute % 5 === 0) {
         weatherData = await getWeatherData();
     }
+
+    // Check if we need to ring the bell
+    const now = moment();
+    const currentTime = now.format('HH:mm');
+    const shouldRingBell = bellTimes.has(currentTime);
     
     // Send updates to all connected clients
     io.emit('timeUpdate', {
@@ -289,7 +295,9 @@ setInterval(async () => {
         isDuringSchool: isDuringSchoolHours(),
         scheduleType: getCurrentScheduleType(),
         announcements: activeAnnouncements,
-        weather: weatherData
+        weather: weatherData,
+        marqueeMessages: marqueeMessages,
+        ringBell: shouldRingBell
     });
 }, 1000);
 
