@@ -107,7 +107,6 @@ function isDuringSchoolHours() {
     const dayOfWeek = now.format('dddd');
     const currentSchedule = getCurrentScheduleType();
 
-    // Add more detailed logging
     console.log('DEBUG - isDuringSchoolHours check:', {
         currentTime,
         dayOfWeek,
@@ -146,14 +145,16 @@ function isDuringSchoolHours() {
     // Get last period end time
     const lastPeriod = scheduleForToday[scheduleForToday.length - 1];
     const [endHour, endMinute] = lastPeriod.end.split(':').map(Number);
-    const schoolEndMinutes = endHour * 60 + endMinute;
+    // Convert end hour to 24-hour format if it's PM (1-11)
+    const endHour24 = endHour < 7 ? endHour + 12 : endHour;
+    const schoolEndMinutes = endHour24 * 60 + endMinute;
 
     console.log('DEBUG - Time calculations:', {
         currentTime: `${currentHour}:${currentMinute}`,
         currentMinutes,
         schoolStartTime: `${startHour}:${startMinute}`,
         schoolStartMinutes,
-        schoolEndTime: `${endHour}:${endMinute}`,
+        schoolEndTime: `${endHour24}:${endMinute}`,
         schoolEndMinutes,
         bufferStart: schoolStartMinutes - 20,
         bufferEnd: schoolEndMinutes + 10
@@ -202,13 +203,16 @@ function getCurrentPeriod() {
     for (const period of scheduleForToday) {
         const [startHour, startMinute] = period.start.split(':').map(Number);
         const [endHour, endMinute] = period.end.split(':').map(Number);
-        const startMinutes = startHour * 60 + startMinute;
-        const endMinutes = endHour * 60 + endMinute;
+        // Convert hours to 24-hour format if they're PM (1-11)
+        const startHour24 = startHour < 7 ? startHour + 12 : startHour;
+        const endHour24 = endHour < 7 ? endHour + 12 : endHour;
+        const startMinutes = startHour24 * 60 + startMinute;
+        const endMinutes = endHour24 * 60 + endMinute;
 
         console.log('Checking period:', {
-            periodName: period.name,
-            startTime: period.start,
-            endTime: period.end,
+            periodName: period.period,
+            startTime: `${startHour24}:${startMinute}`,
+            endTime: `${endHour24}:${endMinute}`,
             currentMinutes,
             startMinutes,
             endMinutes,
@@ -216,7 +220,7 @@ function getCurrentPeriod() {
         });
 
         if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
-            console.log('Found current period:', period.name);
+            console.log('Found current period:', period.period);
             return period;
         }
     }
@@ -252,12 +256,14 @@ function getNextPeriod() {
 
     for (const period of scheduleForToday) {
         const [startHour, startMinute] = period.start.split(':').map(Number);
-        const startMinutes = startHour * 60 + startMinute;
+        // Convert start hour to 24-hour format if it's PM (1-11)
+        const startHour24 = startHour < 7 ? startHour + 12 : startHour;
+        const startMinutes = startHour24 * 60 + startMinute;
         const timeDifference = startMinutes - currentMinutes;
 
         console.log('Checking next period:', {
-            periodName: period.name,
-            startTime: period.start,
+            periodName: period.period,
+            startTime: `${startHour24}:${startMinute}`,
             currentMinutes,
             startMinutes,
             timeDifference,
@@ -271,7 +277,7 @@ function getNextPeriod() {
     }
 
     if (nextPeriod) {
-        console.log('Found next period:', nextPeriod.name);
+        console.log('Found next period:', nextPeriod.period);
     } else {
         console.log('No next period found in schedule');
     }
