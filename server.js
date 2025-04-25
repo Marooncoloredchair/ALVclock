@@ -120,14 +120,19 @@ function isDuringSchoolHours() {
     console.log('Day of week:', dayOfWeek);
     if (dayOfWeek === 0 || dayOfWeek === 6) return false;
 
-    // Convert times to comparable format (minutes since midnight)
-    const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
-    const startMinutes = parseInt(firstPeriod.start.replace(':', '')) / 100 * 60;
-    const endMinutes = parseInt(lastPeriod.end.replace(':', '')) / 100 * 60;
+    // Convert times to minutes since midnight
+    const [currentHour, currentMinute] = currentTime.split(':').map(Number);
+    const currentMinutes = currentHour * 60 + currentMinute;
 
-    console.log('Current minutes:', currentMinutes);
-    console.log('Start minutes:', startMinutes);
-    console.log('End minutes:', endMinutes);
+    const [startHour, startMinute] = firstPeriod.start.split(':').map(Number);
+    const startMinutes = startHour * 60 + startMinute;
+
+    const [endHour, endMinute] = lastPeriod.end.split(':').map(Number);
+    const endMinutes = endHour * 60 + endMinute;
+
+    console.log('Current minutes since midnight:', currentMinutes);
+    console.log('School start minutes since midnight:', startMinutes);
+    console.log('School end minutes since midnight:', endMinutes);
 
     // Add a small buffer before and after school hours (10 minutes)
     const isInSession = currentMinutes >= (startMinutes - 10) && currentMinutes <= (endMinutes + 10);
@@ -146,15 +151,18 @@ function getCurrentPeriod() {
     if (!currentSchedule) return null;
 
     // Convert current time to minutes since midnight
-    const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
-    console.log('Current minutes:', currentMinutes);
+    const [currentHour, currentMinute] = currentTime.split(':').map(Number);
+    const currentMinutes = currentHour * 60 + currentMinute;
     
     for (const period of schedule[currentSchedule]) {
         // Convert period times to minutes since midnight
-        const startMinutes = parseInt(period.start.replace(':', '')) / 100 * 60;
-        const endMinutes = parseInt(period.end.replace(':', '')) / 100 * 60;
+        const [startHour, startMinute] = period.start.split(':').map(Number);
+        const startMinutes = startHour * 60 + startMinute;
+
+        const [endHour, endMinute] = period.end.split(':').map(Number);
+        const endMinutes = endHour * 60 + endMinute;
         
-        console.log(`Checking period ${period.period} - Start: ${startMinutes}, End: ${endMinutes}`);
+        console.log(`Checking period ${period.period} - Start: ${startMinutes}, End: ${endMinutes}, Current: ${currentMinutes}`);
         
         if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
             console.log('Found current period:', period.period);
@@ -174,11 +182,13 @@ function getNextPeriod() {
     if (!currentSchedule) return null;
 
     // Convert current time to minutes since midnight
-    const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
+    const [currentHour, currentMinute] = currentTime.split(':').map(Number);
+    const currentMinutes = currentHour * 60 + currentMinute;
     
     for (const period of schedule[currentSchedule]) {
         // Convert period start time to minutes since midnight
-        const startMinutes = parseInt(period.start.replace(':', '')) / 100 * 60;
+        const [startHour, startMinute] = period.start.split(':').map(Number);
+        const startMinutes = startHour * 60 + startMinute;
         
         if (currentMinutes < startMinutes) {
             return period;
