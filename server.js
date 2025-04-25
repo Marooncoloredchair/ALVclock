@@ -106,6 +106,9 @@ function isDuringSchoolHours() {
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
+    console.log('Current time:', currentTime);
+    console.log('Schedule type:', currentSchedule);
+    
     if (!currentSchedule) return false;
 
     const scheduleForToday = schedule[currentSchedule];
@@ -114,15 +117,22 @@ function isDuringSchoolHours() {
 
     // Check if it's a weekday (Monday = 1, Sunday = 0)
     const dayOfWeek = now.day();
+    console.log('Day of week:', dayOfWeek);
     if (dayOfWeek === 0 || dayOfWeek === 6) return false;
 
     // Convert times to comparable format (minutes since midnight)
     const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
-    const startMinutes = parseInt(firstPeriod.start.split(':')[0]) * 60 + parseInt(firstPeriod.start.split(':')[1]);
-    const endMinutes = parseInt(lastPeriod.end.split(':')[0]) * 60 + parseInt(lastPeriod.end.split(':')[1]);
+    const startMinutes = parseInt(firstPeriod.start.replace(':', '')) / 100 * 60;
+    const endMinutes = parseInt(lastPeriod.end.replace(':', '')) / 100 * 60;
+
+    console.log('Current minutes:', currentMinutes);
+    console.log('Start minutes:', startMinutes);
+    console.log('End minutes:', endMinutes);
 
     // Add a small buffer before and after school hours (10 minutes)
-    return currentMinutes >= (startMinutes - 10) && currentMinutes <= (endMinutes + 10);
+    const isInSession = currentMinutes >= (startMinutes - 10) && currentMinutes <= (endMinutes + 10);
+    console.log('Is in session:', isInSession);
+    return isInSession;
 }
 
 // Helper function to get current period
@@ -131,20 +141,27 @@ function getCurrentPeriod() {
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
     
+    console.log('Getting current period for time:', currentTime);
+    
     if (!currentSchedule) return null;
 
     // Convert current time to minutes since midnight
     const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
+    console.log('Current minutes:', currentMinutes);
     
     for (const period of schedule[currentSchedule]) {
         // Convert period times to minutes since midnight
-        const startMinutes = parseInt(period.start.split(':')[0]) * 60 + parseInt(period.start.split(':')[1]);
-        const endMinutes = parseInt(period.end.split(':')[0]) * 60 + parseInt(period.end.split(':')[1]);
+        const startMinutes = parseInt(period.start.replace(':', '')) / 100 * 60;
+        const endMinutes = parseInt(period.end.replace(':', '')) / 100 * 60;
+        
+        console.log(`Checking period ${period.period} - Start: ${startMinutes}, End: ${endMinutes}`);
         
         if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+            console.log('Found current period:', period.period);
             return period;
         }
     }
+    console.log('No current period found');
     return null;
 }
 
@@ -161,7 +178,7 @@ function getNextPeriod() {
     
     for (const period of schedule[currentSchedule]) {
         // Convert period start time to minutes since midnight
-        const startMinutes = parseInt(period.start.split(':')[0]) * 60 + parseInt(period.start.split(':')[1]);
+        const startMinutes = parseInt(period.start.replace(':', '')) / 100 * 60;
         
         if (currentMinutes < startMinutes) {
             return period;
@@ -174,16 +191,25 @@ function getNextPeriod() {
 function getCurrentScheduleType() {
     // Check for schedule overrides first
     const today = moment().format('YYYY-MM-DD');
+    console.log('Checking schedule type for date:', today);
+    
     const override = scheduleOverrides.find(o => o.date === today);
-    if (override) return override.type;
+    if (override) {
+        console.log('Found schedule override:', override.type);
+        return override.type;
+    }
 
     // Check if it's Wednesday
     const dayOfWeek = moment().day();
+    console.log('Day of week:', dayOfWeek);
+    
     if (dayOfWeek === 3) { // Wednesday is 3
+        console.log('It is Wednesday, using wednesday schedule');
         return 'wednesday';
     }
 
     // Default to regular schedule
+    console.log('Using regular schedule');
     return 'regular';
 }
 
@@ -306,4 +332,4 @@ setInterval(async () => {
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-}); 
+});
