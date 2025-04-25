@@ -105,16 +105,23 @@ function isDuringSchoolHours() {
     const now = moment();
     const currentTime = now.format('HH:mm');
     const currentSchedule = getCurrentScheduleType();
+    
     if (!currentSchedule) return false;
 
-    const firstPeriod = schedule[currentSchedule][0];
-    const lastPeriod = schedule[currentSchedule][schedule[currentSchedule].length - 1];
-    
-    // Convert schedule times to 24-hour format for comparison
-    const dayStart = firstPeriod.start;
-    const dayEnd = lastPeriod.end;
-    
-    return currentTime >= dayStart && currentTime <= dayEnd;
+    const scheduleForToday = schedule[currentSchedule];
+    const firstPeriod = scheduleForToday[0];
+    const lastPeriod = scheduleForToday[scheduleForToday.length - 1];
+
+    // Check if it's a weekday (Monday = 1, Sunday = 0)
+    const dayOfWeek = now.day();
+    if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+
+    // Convert times to comparable format (minutes since midnight)
+    const currentMinutes = moment(currentTime, 'HH:mm').hours() * 60 + moment(currentTime, 'HH:mm').minutes();
+    const startMinutes = moment(firstPeriod.start, 'HH:mm').hours() * 60 + moment(firstPeriod.start, 'HH:mm').minutes();
+    const endMinutes = moment(lastPeriod.end, 'HH:mm').hours() * 60 + moment(lastPeriod.end, 'HH:mm').minutes();
+
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
 }
 
 // Helper function to get current period
@@ -124,9 +131,16 @@ function getCurrentPeriod() {
     const currentSchedule = getCurrentScheduleType();
     
     if (!currentSchedule) return null;
+
+    // Convert current time to minutes since midnight
+    const currentMinutes = moment(currentTime, 'HH:mm').hours() * 60 + moment(currentTime, 'HH:mm').minutes();
     
     for (const period of schedule[currentSchedule]) {
-        if (currentTime >= period.start && currentTime <= period.end) {
+        // Convert period times to minutes since midnight
+        const startMinutes = moment(period.start, 'HH:mm').hours() * 60 + moment(period.start, 'HH:mm').minutes();
+        const endMinutes = moment(period.end, 'HH:mm').hours() * 60 + moment(period.end, 'HH:mm').minutes();
+        
+        if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
             return period;
         }
     }
@@ -140,10 +154,15 @@ function getNextPeriod() {
     const currentSchedule = getCurrentScheduleType();
     
     if (!currentSchedule) return null;
+
+    // Convert current time to minutes since midnight
+    const currentMinutes = moment(currentTime, 'HH:mm').hours() * 60 + moment(currentTime, 'HH:mm').minutes();
     
-    for (let i = 0; i < schedule[currentSchedule].length; i++) {
-        const period = schedule[currentSchedule][i];
-        if (currentTime < period.start) {
+    for (const period of schedule[currentSchedule]) {
+        // Convert period start time to minutes since midnight
+        const startMinutes = moment(period.start, 'HH:mm').hours() * 60 + moment(period.start, 'HH:mm').minutes();
+        
+        if (currentMinutes < startMinutes) {
             return period;
         }
     }
