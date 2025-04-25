@@ -71,10 +71,12 @@
                 <h2>
                     <% if (scheduleType === 'regular') { %>
                         Regular Schedule
-                    <% } else if (scheduleType === 'extended') { %>
-                        Extended Advisory Schedule
-                    <% } else if (scheduleType === 'early') { %>
-                        Early Release Schedule
+                    <% } else if (scheduleType === 'wednesday') { %>
+                        Wednesday Schedule
+                    <% } else if (scheduleType === 'delay1hr') { %>
+                        1 Hour Delay Schedule
+                    <% } else if (scheduleType === 'delay2hr') { %>
+                        2 Hour Delay Schedule
                     <% } %>
                 </h2>
             </div>
@@ -99,12 +101,143 @@
             </div>
 
             <div class="schedule-grid">
-                <% schedule.forEach(period => { %>
-                    <div class="period <%= currentPeriod && currentPeriod.period === period.period ? 'active' : '' %>">
-                        <div class="period-name"><%= period.period %></div>
-                        <div class="period-time"><%= moment(period.start, 'HH:mm').format('h:mm A') %> - <%= moment(period.end, 'HH:mm').format('h:mm A') %></div>
+                <% if (scheduleType === 'regular') { %>
+                    <div class="period <%= currentPeriod === 'Period 1' ? 'active' : '' %>">
+                        <span>Period 1</span>
+                        <span>7:45 - 8:55</span>
                     </div>
-                <% }); %>
+                    <div class="period <%= currentPeriod === 'Period 2' ? 'active' : '' %>">
+                        <span>Period 2</span>
+                        <span>9:00 - 10:10</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 3' ? 'active' : '' %>">
+                        <span>Period 3</span>
+                        <span>10:14 - 12:01</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch A' ? 'active' : '' %>">
+                        <span>Lunch A</span>
+                        <span>10:14 - 10:47</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch B' ? 'active' : '' %>">
+                        <span>Lunch B</span>
+                        <span>10:51 - 11:24</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch C' ? 'active' : '' %>">
+                        <span>Lunch C</span>
+                        <span>11:28 - 12:01</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 4' ? 'active' : '' %>">
+                        <span>Period 4</span>
+                        <span>12:05 - 1:15</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 5' ? 'active' : '' %>">
+                        <span>Period 5</span>
+                        <span>1:20 - 2:30</span>
+                    </div>
+                <% } else if (scheduleType === 'wednesday') { %>
+                    <div class="period <%= currentPeriod === 'Period 1' ? 'active' : '' %>">
+                        <span>Period 1</span>
+                        <span>7:45 - 8:45</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 2' ? 'active' : '' %>">
+                        <span>Period 2</span>
+                        <span>8:50 - 9:50</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Advisory' ? 'active' : '' %>">
+                        <span>Advisory</span>
+                        <span>9:54 - 10:39</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 3' ? 'active' : '' %>">
+                        <span>Period 3</span>
+                        <span>10:43 - 12:21</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch A' ? 'active' : '' %>">
+                        <span>Lunch A</span>
+                        <span>10:43 - 11:13</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch B' ? 'active' : '' %>">
+                        <span>Lunch B</span>
+                        <span>11:17 - 11:47</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch C' ? 'active' : '' %>">
+                        <span>Lunch C</span>
+                        <span>11:51 - 12:21</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 4' ? 'active' : '' %>">
+                        <span>Period 4</span>
+                        <span>12:25 - 1:25</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 5' ? 'active' : '' %>">
+                        <span>Period 5</span>
+                        <span>1:30 - 2:30</span>
+                    </div>
+                <% } else if (scheduleType === 'delay1hr') { %>
+                    <div class="period <%= currentPeriod === 'Period 1' ? 'active' : '' %>">
+                        <span>Period 1</span>
+                        <span>8:45 - 9:45</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 2' ? 'active' : '' %>">
+                        <span>Period 2</span>
+                        <span>9:50 - 10:50</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 3' ? 'active' : '' %>">
+                        <span>Period 3</span>
+                        <span>10:54 - 12:32</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch A' ? 'active' : '' %>">
+                        <span>Lunch A</span>
+                        <span>10:54 - 11:24</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch B' ? 'active' : '' %>">
+                        <span>Lunch B</span>
+                        <span>11:28 - 11:58</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch C' ? 'active' : '' %>">
+                        <span>Lunch C</span>
+                        <span>12:02 - 12:32</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 4' ? 'active' : '' %>">
+                        <span>Period 4</span>
+                        <span>12:36 - 1:36</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 5' ? 'active' : '' %>">
+                        <span>Period 5</span>
+                        <span>1:40 - 2:30</span>
+                    </div>
+                <% } else if (scheduleType === 'delay2hr') { %>
+                    <div class="period <%= currentPeriod === 'Period 1' ? 'active' : '' %>">
+                        <span>Period 1</span>
+                        <span>9:45 - 10:35</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 2' ? 'active' : '' %>">
+                        <span>Period 2</span>
+                        <span>10:40 - 11:30</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 3' ? 'active' : '' %>">
+                        <span>Period 3</span>
+                        <span>11:34 - 1:12</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch A' ? 'active' : '' %>">
+                        <span>Lunch A</span>
+                        <span>11:34 - 12:04</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch B' ? 'active' : '' %>">
+                        <span>Lunch B</span>
+                        <span>12:08 - 12:38</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Lunch C' ? 'active' : '' %>">
+                        <span>Lunch C</span>
+                        <span>12:42 - 1:12</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 4' ? 'active' : '' %>">
+                        <span>Period 4</span>
+                        <span>1:16 - 1:56</span>
+                    </div>
+                    <div class="period <%= currentPeriod === 'Period 5' ? 'active' : '' %>">
+                        <span>Period 5</span>
+                        <span>2:00 - 2:30</span>
+                    </div>
+                <% } %>
             </div>
         </div>
 
@@ -187,7 +320,7 @@
 
             // Update schedule grid
             document.querySelectorAll('.period').forEach(periodDiv => {
-                const periodName = periodDiv.querySelector('.period-name').textContent;
+                const periodName = periodDiv.querySelector('span').textContent;
                 if (data.currentPeriod && data.currentPeriod.period === periodName) {
                     periodDiv.classList.add('active');
                 } else {

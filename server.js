@@ -34,29 +34,45 @@ const specialEvents = [
 // School schedule configuration
 const schedule = {
     regular: [
-        { period: '1', start: '07:25', end: '08:47' },
-        { period: '2', start: '08:51', end: '10:13' },
-        { period: '3', start: '10:17', end: '11:39' },
-        { period: 'Lunch', start: '11:39', end: '12:09' },
-        { period: '4', start: '12:13', end: '13:35' },
-        { period: '5', start: '13:39', end: '15:01' }
+        { period: '1', start: '07:45', end: '08:55' },
+        { period: '2', start: '09:00', end: '10:10' },
+        { period: '3/Lunch', start: '10:14', end: '12:01' },
+        { period: 'Lunch A', start: '10:14', end: '10:47' },
+        { period: 'Lunch B', start: '10:51', end: '11:24' },
+        { period: 'Lunch C', start: '11:28', end: '12:01' },
+        { period: '4', start: '12:05', end: '01:15' },
+        { period: '5', start: '01:20', end: '02:30' }
     ],
-    extended: [
-        { period: '1', start: '07:25', end: '08:40' },
-        { period: '2', start: '08:44', end: '09:59' },
-        { period: 'Advisory', start: '10:03', end: '10:48' },
-        { period: '3', start: '10:52', end: '12:07' },
-        { period: 'Lunch', start: '12:07', end: '12:37' },
-        { period: '4', start: '12:41', end: '13:56' },
-        { period: '5', start: '14:00', end: '15:15' }
+    wednesday: [
+        { period: '1', start: '07:45', end: '08:45' },
+        { period: '2', start: '08:50', end: '09:50' },
+        { period: 'Advisory', start: '09:54', end: '10:39' },
+        { period: '3/Lunch', start: '10:43', end: '12:21' },
+        { period: 'Lunch A', start: '10:43', end: '11:13' },
+        { period: 'Lunch B', start: '11:17', end: '11:47' },
+        { period: 'Lunch C', start: '11:51', end: '12:21' },
+        { period: '4', start: '12:25', end: '01:25' },
+        { period: '5', start: '01:30', end: '02:30' }
     ],
-    early: [
-        { period: '1', start: '07:25', end: '08:35' },
-        { period: '2', start: '08:39', end: '09:49' },
-        { period: '3', start: '09:53', end: '11:03' },
-        { period: '4', start: '11:07', end: '12:17' },
-        { period: 'Lunch', start: '12:17', end: '12:47' },
-        { period: '5', start: '12:51', end: '14:01' }
+    delay1hr: [
+        { period: '1', start: '08:45', end: '09:45' },
+        { period: '2', start: '09:48', end: '10:48' },
+        { period: '3/Lunch', start: '10:51', end: '12:23' },
+        { period: 'Lunch A', start: '10:51', end: '11:19' },
+        { period: 'Lunch B', start: '11:23', end: '11:51' },
+        { period: 'Lunch C', start: '11:55', end: '12:23' },
+        { period: '4', start: '12:27', end: '01:27' },
+        { period: '5', start: '01:30', end: '02:30' }
+    ],
+    delay2hr: [
+        { period: '1', start: '09:45', end: '10:34' },
+        { period: '2', start: '10:38', end: '11:27' },
+        { period: '3/Lunch', start: '11:31', end: '01:16' },
+        { period: 'Lunch A', start: '11:31', end: '11:54' },
+        { period: 'Lunch B', start: '11:57', end: '12:20' },
+        { period: 'Lunch C', start: '12:53', end: '01:16' },
+        { period: '4', start: '01:20', end: '02:08' },
+        { period: '5', start: '02:12', end: '03:00' }
     ]
 };
 
@@ -141,8 +157,32 @@ function getCurrentScheduleType() {
     const override = scheduleOverrides.find(o => o.date === today);
     if (override) return override.type;
 
+    // Check if it's Wednesday
+    const dayOfWeek = moment().day();
+    if (dayOfWeek === 3) { // Wednesday is 3
+        return 'wednesday';
+    }
+
     // Default to regular schedule
     return 'regular';
+}
+
+// Function to fetch weather data
+async function getWeatherData() {
+    try {
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${PROVIDENCE_LAT}&lon=${PROVIDENCE_LON}&appid=${WEATHER_API_KEY}&units=imperial`
+        );
+        const data = await response.json();
+        return {
+            temp: Math.round(data.main.temp),
+            description: data.weather[0].description,
+            icon: data.weather[0].icon
+        };
+    } catch (error) {
+        console.error('Error fetching weather:', error);
+        return null;
+    }
 }
 
 // Routes
@@ -187,17 +227,21 @@ app.post('/admin/schedule-override', (req, res) => {
 });
 
 // Socket.IO connection handling
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log('A user connected');
+    
+    // Get initial weather data
+    const weatherData = await getWeatherData();
     
     // Send initial data
     socket.emit('timeUpdate', {
-        time: moment().format('h:mm:ss A'), // Changed to 12-hour format with AM/PM
+        time: moment().format('h:mm:ss A'),
         date: moment().format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
         isDuringSchool: isDuringSchoolHours(),
-        scheduleType: getCurrentScheduleType()
+        scheduleType: getCurrentScheduleType(),
+        weather: weatherData
     });
 
     socket.on('disconnect', () => {
@@ -206,19 +250,27 @@ io.on('connection', (socket) => {
 });
 
 // Update time and schedule information every second
-setInterval(() => {
+setInterval(async () => {
     // Clean up expired announcements
     activeAnnouncements = activeAnnouncements.filter(a => a.expires > Date.now());
     
+    // Get weather data (update every 5 minutes)
+    const currentMinute = new Date().getMinutes();
+    let weatherData = null;
+    if (currentMinute % 5 === 0) {
+        weatherData = await getWeatherData();
+    }
+    
     // Send updates to all connected clients
     io.emit('timeUpdate', {
-        time: moment().format('h:mm:ss A'), // Changed to 12-hour format with AM/PM
+        time: moment().format('h:mm:ss A'),
         date: moment().format('dddd, MMMM D, YYYY'),
         currentPeriod: getCurrentPeriod(),
         nextPeriod: getNextPeriod(),
         isDuringSchool: isDuringSchoolHours(),
         scheduleType: getCurrentScheduleType(),
-        announcements: activeAnnouncements
+        announcements: activeAnnouncements,
+        weather: weatherData
     });
 }, 1000);
 
