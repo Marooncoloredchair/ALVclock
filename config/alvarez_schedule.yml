@@ -1,0 +1,123 @@
+daily_schedule:
+  name: "Regular Day Schedule"
+  periods:
+    - number: 0
+      text: "Advisory"
+      start: "7:40"
+      finish: "7:56"
+    - number: 1
+      text: "Period 1"
+      start: "8:00"
+      finish: "8:52"
+    - number: 2
+      text: "Period 2"
+      start: "8:56"
+      finish: "9:48"
+    - number: 3
+      text: "Period 3"
+      start: "9:52"
+      finish: "10:44"
+    - number: 4
+      text: "Period 4"
+      start: "10:48"
+      finish: "12:17"
+    - number: "4A"
+      text: "A Lunch"
+      start: "10:48"
+      finish: "11:15"
+    - number: "4B"
+      text: "B Lunch"
+      start: "11:19"
+      finish: "11:46"
+    - number: "4C"
+      text: "C Lunch"
+      start: "11:50"
+      finish: "12:17"
+    - number: 5
+      text: "Period 5"
+      start: "12:21"
+      finish: "13:13"
+    - number: 6
+      text: "Period 6"
+      start: "13:17"
+      finish: "14:11"
+
+extended_advisory:
+  name: "Extended Advisory Schedule"
+  periods:
+    - number: 0
+      text: "Advisory"
+      start: "7:40"
+      finish: "8:30"
+    - number: 1
+      text: "Period 1"
+      start: "8:34"
+      finish: "9:20"
+    - number: 2
+      text: "Period 2"
+      start: "9:24"
+      finish: "10:10"
+    - number: 3
+      text: "Period 3"
+      start: "10:14"
+      finish: "11:00"
+    - number: 4
+      text: "Period 4"
+      start: "11:04"
+      finish: "12:31"
+    - number: "4A"
+      text: "A Lunch"
+      start: "11:04"
+      finish: "11:31"
+    - number: "4B"
+      text: "B Lunch"
+      start: "11:34"
+      finish: "12:01"
+    - number: "4C"
+      text: "C Lunch"
+      start: "12:04"
+      finish: "12:31"
+    - number: 5
+      text: "Period 5"
+      start: "12:35"
+      finish: "13:21"
+    - number: 6
+      text: "Period 6"
+      start: "13:25"
+      finish: "14:11"
+
+early_release:
+  name: "Early Release Schedule"
+  periods:
+    - number: 0
+      text: "Advisory"
+      start: "7:40"
+      finish: "7:56"
+    - number: 1
+      text: "Period 1"
+      start: "8:00"
+      finish: "8:33"
+    - number: 2
+      text: "Period 2"
+      start: "8:37"
+      finish: "9:10"
+    - number: 3
+      text: "Period 3"
+      start: "9:14"
+      finish: "9:47"
+    - number: 4
+      text: "Period 4"
+      start: "9:51"
+      finish: "10:24"
+    - number: 5
+      text: "Period 5"
+      start: "10:28"
+      finish: "11:01"
+    - number: 6
+      text: "Period 6"
+      start: "11:05"
+      finish: "11:38"
+    - number: "L"
+      text: "Grab and Go Lunch"
+      start: "11:38"
+      finish: "12:08" 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= schoolName %> Clock</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><%= schoolName %></h1>
+        </header>
+
+        <div class="clock-container">
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">Loading...</div>
+        </div>
+
+        <div class="schedule-container">
+            <div class="current-period">
+                <h2>Current Period</h2>
+                <div id="currentPeriod">
+                    <% if (currentPeriod) { %>
+                        <div class="period active">
+                            <span class="period-name"><%= currentPeriod.period %></span>
+                            <span class="period-time"><%= currentPeriod.start %> - <%= currentPeriod.end %></span>
+                        </div>
+                    <% } else { %>
+                        <div class="period">No active period</div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="schedule">
+                <h2>Today's Schedule</h2>
+                <div class="periods">
+                    <% schedule.forEach(function(period) { %>
+                        <div class="period <%= currentPeriod && currentPeriod.period === period.period ? 'active' : '' %>">
+                            <span class="period-name"><%= period.period %></span>
+                            <span class="period-time"><%= period.start %> - <%= period.end %></span>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        
+        socket.on('timeUpdate', function(data) {
+            document.getElementById('time').textContent = data.time;
+            document.getElementById('date').textContent = data.date;
+            
+            // Update current period
+            const currentPeriodDiv = document.getElementById('currentPeriod');
+            if (data.currentPeriod) {
+                currentPeriodDiv.innerHTML = `
+                    <div class="period active">
+                        <span class="period-name">${data.currentPeriod.period}</span>
+                        <span class="period-time">${data.currentPeriod.start} - ${data.currentPeriod.end}</span>
+                    </div>
+                `;
+            } else {
+                currentPeriodDiv.innerHTML = '<div class="period">No active period</div>';
+            }
+        });
+    </script>
+</body>
+</html> 

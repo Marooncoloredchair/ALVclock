@@ -1,0 +1,22 @@
+{
+  "name": "alvarez-clock",
+  "version": "1.0.0",
+  "description": "Digital clock and schedule display system for Alvarez High School",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["clock", "school", "schedule", "display"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ejs": "^3.1.6",
+    "moment": "^2.29.1",
+    "socket.io": "^4.4.1"
+  }
+}

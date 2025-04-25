@@ -1,0 +1,52 @@
+// Alvarez High School Theme Colors
+$primary-color: #800000;    // Maroon
+$secondary-color: #808080;  // Grey
+$text-color: #FFFFFF;       // White
+$accent-color: darken($secondary-color, 10%);
+
+body {
+  background-color: $primary-color;
+  color: $text-color;
+}
+
+.header {
+  background-color: $secondary-color;
+  border-bottom: 3px solid $text-color;
+}
+
+.period {
+  background-color: rgba($secondary-color, 0.9);
+  border: 1px solid $text-color;
+  
+  &.current {
+    background-color: rgba($text-color, 0.9);
+    color: $primary-color;
+    border: 2px solid $accent-color;
+  }
+}
+
+.time {
+  color: $text-color;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.date {
+  color: $text-color;
+  background-color: rgba($secondary-color, 0.8);
+}
+
+.announcements {
+  background-color: rgba($secondary-color, 0.8);
+  border-top: 2px solid $text-color;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .period {
+    background-color: rgba($secondary-color, 0.95);
+  }
+  
+  .time {
+    font-size: 3em;
+  }
+} 
